@@ -24,14 +24,12 @@ export function useWaitlist(): UseWaitlistReturn {
 
   const handleSubmit = async () => {
     if (!email) {
-      toast.error("Please provide your email to join the cosmic waitlist 🌌");
+      toast.error("Please provide your email to join the waitlist");
       return;
     }
 
     if (!isValidEmail(email)) {
-      toast.error(
-        "That email doesn't look right. Is it from this universe? 👽"
-      );
+      toast.error("Invalid email format. Please enter a valid email address");
       return;
     }
 
@@ -63,18 +61,18 @@ export function useWaitlist(): UseWaitlistReturn {
     });
 
     toast.promise(promise, {
-      loading: "Preparing your cosmic journey... 🚀",
+      loading: "Connecting to the blockchain network...",
       success: () => {
         setEmail("");
-        return "Welcome aboard! Your seat on the spaceship is confirmed 🌠";
+        return "Transaction confirmed. Your address has been added to the whitelist";
       },
       error: (error) => {
         if (error === "Rate limited") {
-          return "Whoa there, time traveler! Slow down and try again later 🕰️";
+          return "Transaction throttled. Please wait for the next block to attempt again";
         } else if (error === "Notion insertion failed") {
-          return "Your data got lost in a black hole. Let's try again 🕳️";
+          return "Smart contract execution failed. Please try again";
         }
-        return "Unexpected cosmic disturbance. Please try again 🌪️";
+        return "Unexpected network error during transaction. Please try again";
       },
     });
 

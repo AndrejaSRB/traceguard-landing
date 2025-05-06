@@ -2,9 +2,8 @@
 
 import CTA from "@/components/cta";
 import Form from "@/components/form";
-import Particles from "@/components/ui/particles";
 import { useWaitlist } from "./hooks/useWaitlist";
-
+import { BackgroundAnimation } from "@/components/ui/background-animation";
 export default function Home() {
   const { email, loading, handleEmailChange, handleSubmit } = useWaitlist();
 
@@ -20,13 +19,13 @@ export default function Home() {
           loading={loading}
         />
       </section>
-
-      <Particles
-        quantityDesktop={700}
-        quantityMobile={100}
-        ease={80}
-        color={"#cfaaff"}
-        refresh
+      <BackgroundAnimation
+        primaryColor="#6b4f8e"
+        particleCount={380}
+        baseSpeed={0.1}
+        rangeSpeed={0.8}
+        baseRadius={0.8}
+        rangeRadius={1.0}
       />
     </main>
   );

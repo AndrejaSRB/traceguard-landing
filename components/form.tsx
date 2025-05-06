@@ -39,6 +39,11 @@ export default function Form({
           placeholder="Your Email Address"
           value={email}
           onChange={handleEmailChange}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSubmit();
+            }
+          }}
           className="text-base"
         />
       </motion.div>
