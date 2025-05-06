@@ -4,6 +4,7 @@ import CTA from "@/components/cta";
 import Form from "@/components/form";
 import { useWaitlist } from "./hooks/useWaitlist";
 import { BackgroundAnimation } from "@/components/ui/background-animation";
+
 export default function Home() {
   const { email, loading, handleEmailChange, handleSubmit } = useWaitlist();
 
@@ -21,7 +22,8 @@ export default function Home() {
       </section>
       <BackgroundAnimation
         primaryColor="#6b4f8e"
-        particleCount={380}
+        mobileParticleCount={100}
+        desktopParticleCount={380}
         baseSpeed={0.1}
         rangeSpeed={0.8}
         baseRadius={0.8}

@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createNoise3D } from "simplex-noise";
 import { motion } from "framer-motion";
+import { useIsMobile } from "@/app/hooks/useMobile";
 
 interface BackgroundAnimationProps {
-  particleCount?: number;
+  mobileParticleCount?: number;
+  desktopParticleCount?: number;
   rangeY?: number;
   baseSpeed?: number;
   rangeSpeed?: number;
@@ -96,13 +98,18 @@ export const BackgroundAnimation = (props: BackgroundAnimationProps) => {
   const animationFrameId = useRef<number | null>(null);
   const isInitialized = useRef<boolean>(false);
   const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const isMobile = useIsMobile();
 
   // Get global mouse position
   const mousePosition = useMousePosition();
 
-  const particleCount = props.particleCount || 700;
+  const particleCount = useMemo(() => {
+    return isMobile
+      ? props.mobileParticleCount || 100
+      : props.desktopParticleCount || 380;
+  }, [isMobile, props.mobileParticleCount, props.desktopParticleCount]);
+
   const particlePropCount = 9;
-  const particlePropsLength = particleCount * particlePropCount;
   const rangeY = props.rangeY || 200;
   const baseTTL = 120;
   const rangeTTL = 300;
@@ -125,7 +132,7 @@ export const BackgroundAnimation = (props: BackgroundAnimationProps) => {
 
   let tick = 0;
   const noise3D = createNoise3D();
-  let particleProps = new Float32Array(particlePropsLength);
+  let particleProps = new Float32Array(0);
   const center = useRef<[number, number]>([0, 0]);
 
   const HALF_PI: number = 0.5 * Math.PI;
@@ -153,7 +160,7 @@ export const BackgroundAnimation = (props: BackgroundAnimationProps) => {
 
     center.current = [0.5 * canvas.width, 0.5 * canvas.height];
 
-    // Re-initialize particles after resize
+    // Re-initialize particles after resize only if already initialized
     if (isInitialized.current) {
       initParticles();
     }
@@ -161,9 +168,11 @@ export const BackgroundAnimation = (props: BackgroundAnimationProps) => {
 
   const initParticles = () => {
     tick = 0;
-    particleProps = new Float32Array(particlePropsLength);
+    // Create new particle array with the current particleCount
+    const currentParticlePropsLength = particleCount * particlePropCount;
+    particleProps = new Float32Array(currentParticlePropsLength);
 
-    for (let i = 0; i < particlePropsLength; i += particlePropCount) {
+    for (let i = 0; i < currentParticlePropsLength; i += particlePropCount) {
       initParticle(i);
     }
   };
@@ -318,7 +327,9 @@ export const BackgroundAnimation = (props: BackgroundAnimationProps) => {
   };
 
   const drawParticles = (ctx: CanvasRenderingContext2D) => {
-    for (let i = 0; i < particlePropsLength; i += particlePropCount) {
+    // Use the current length of particleProps array
+    const currentParticlePropsLength = particleProps.length;
+    for (let i = 0; i < currentParticlePropsLength; i += particlePropCount) {
       updateParticle(i, ctx);
     }
   };
@@ -327,15 +338,18 @@ export const BackgroundAnimation = (props: BackgroundAnimationProps) => {
   const drawConnections = (ctx: CanvasRenderingContext2D) => {
     ctx.save();
 
+    // Use the current length of particleProps array
+    const currentParticlePropsLength = particleProps.length;
+
     // For each pair of particles
-    for (let i = 0; i < particlePropsLength; i += particlePropCount) {
+    for (let i = 0; i < currentParticlePropsLength; i += particlePropCount) {
       const x1 = particleProps[i];
       const y1 = particleProps[i + 1];
       const hue1 = particleProps[i + 8];
 
       for (
         let j = i + particlePropCount;
-        j < particlePropsLength;
+        j < currentParticlePropsLength;
         j += particlePropCount
       ) {
         const x2 = particleProps[j];
@@ -452,7 +466,7 @@ export const BackgroundAnimation = (props: BackgroundAnimationProps) => {
     // Set canvas dimensions
     resize(canvas, ctx);
 
-    // Initialize particles
+    // Initialize particles with current particleCount
     initParticles();
     isInitialized.current = true;
 
@@ -477,7 +491,24 @@ export const BackgroundAnimation = (props: BackgroundAnimationProps) => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
       if (canvas && ctx) {
+        // Force update of the particlePropsLength based on current particleCount
+        const currentParticlePropsLength = particleCount * particlePropCount;
+
         resize(canvas, ctx);
+
+        // Ensure we re-initialize with the correct number of particles
+        tick = 0;
+        particleProps = new Float32Array(currentParticlePropsLength);
+
+        for (
+          let i = 0;
+          i < currentParticlePropsLength;
+          i += particlePropCount
+        ) {
+          initParticle(i);
+        }
+
+        isInitialized.current = true;
       }
     };
 
@@ -493,7 +524,7 @@ export const BackgroundAnimation = (props: BackgroundAnimationProps) => {
 
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [particleCount]);
 
   return (
     <motion.div
