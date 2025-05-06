@@ -30,7 +30,7 @@ export default function RootLayout({
       <meta name="twitter:image:height" content="832" />
       <body className={FigtreeFont.className}>
         {children}
-        <Toaster richColors position="top-center" />
+        <Toaster richColors position="bottom-right" />
         <Analytics />
       </body>
     </html>

@@ -14,13 +14,13 @@ export async function POST(request: Request) {
           type: "email",
           email: body?.email,
         },
-        Name: {
+        ID: {
           type: "title",
           title: [
             {
               type: "text",
               text: {
-                content: body?.name,
+                content: body?.id || `user_${Date.now()}`,
               },
             },
           ],
